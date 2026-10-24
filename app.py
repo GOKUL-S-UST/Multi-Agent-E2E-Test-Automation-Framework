@@ -24,8 +24,10 @@ from config import (
 from graph import RECURSION_LIMIT, build_graph, initial_state
 from ui import render
 from ui.gate_cards import GATE_CARDS
+from ui.theme import inject_global_css
 
 st.set_page_config(page_title="AI-native E2E · Phase 1 POC", page_icon="🧪", layout="wide")
+inject_global_css()
 
 API_KEY_VARS = {"gemini": ("GOOGLE_API_KEY", "GEMINI_API_KEY"), "openai": ("OPENAI_API_KEY",), "anthropic": ("ANTHROPIC_API_KEY",)}
 

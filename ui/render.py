@@ -15,6 +15,7 @@ import streamlit as st
 
 from config import MAX_HEAL_ATTEMPTS
 from execution.failure_classifier import CATEGORY_LABELS
+from ui.theme import stepper_html
 
 NODE_LABELS = {
     "orchestrator": "Orchestrator",
@@ -73,10 +74,8 @@ def stage_status(values: dict, stage: str, pending_gate: str | None) -> str:
 
 
 def render_stepper(values: dict, pending_gate: str | None) -> None:
-    cols = st.columns(len(STAGES))
-    for col, (key, title, _) in zip(cols, STAGES):
-        status = stage_status(values, key, pending_gate) if values else "pending"
-        col.markdown(f"{STATUS_ICON[status]} **{title}**")
+    steps = [(key, stage_status(values, key, pending_gate) if values else "pending") for key, _, _ in STAGES]
+    st.html(stepper_html(steps))
 
 
 def _df(rows: list[dict], columns: list[str]) -> pd.DataFrame:
