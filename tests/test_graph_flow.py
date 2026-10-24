@@ -25,7 +25,7 @@ def _result(status, healable=True, category="mechanical"):
 
 @pytest.fixture
 def harness(monkeypatch, tmp_path):
-    def make(fake: FakeLLM, run_results: list[dict]):
+    def make(fake: FakeLLM, run_results: list[dict], **configurable):
         executed_code = []
 
         def fake_run_suite(code, **kwargs):
@@ -36,7 +36,7 @@ def harness(monkeypatch, tmp_path):
         monkeypatch.setattr("execution.site_explorer.explore", lambda url: {"url": url, "title": "Demo", "aria_snapshot": "- button"})
         monkeypatch.setattr("graph.nodes.OUTPUT_DIR", tmp_path)
         graph = build_graph(llm_factory=lambda cfg: fake)
-        config = {"configurable": {"thread_id": "t1"}, "recursion_limit": RECURSION_LIMIT}
+        config = {"configurable": {"thread_id": "t1", **configurable}, "recursion_limit": RECURSION_LIMIT}
 
         def step(inp):
             for _ in graph.stream(inp, config, stream_mode="updates"):
@@ -186,3 +186,13 @@ def test_gate2_human_edit_reruns(harness):
     assert gate == "gate2"
     assert executed[-1] == CHEATING_CODE
     assert values["execution_results"][-1]["label"] == "Human edit"
+
+
+def test_auto_run_skips_run_confirmation(harness):
+    step, executed = harness(FakeLLM(), [_result("passed")], auto_run=True)
+    _, gate = step(start())
+    _, gate = step(Command(resume={"action": "approve"}))
+    values, gate = step(Command(resume={"action": "approve"}))
+    assert gate == "gate2"
+    assert len(executed) == 1
+    assert values["code_run_confirmed"]

@@ -86,7 +86,7 @@ def gate0_node(state: dict) -> dict:
 
 
 # --------------------------------------------------------------------- Gate 1
-def _validated_test_cases(raw: list[dict]) -> list[dict]:
+def validate_test_cases(raw: list[dict]) -> list[dict]:
     try:
         cases = [test_case_to_state(test_case_from_state(tc)) for tc in raw]
     except Exception as exc:
@@ -109,7 +109,7 @@ def gate1_node(state: dict) -> dict:
     if action == "edit":
         # Edits are saved and the coverage matrix is rebuilt; the gate is shown
         # again so the reviewer approves what the new coverage looks like.
-        return {"test_cases": _validated_test_cases(decision.get("test_cases") or []), "coverage_matrix": None}
+        return {"test_cases": validate_test_cases(decision.get("test_cases") or []), "coverage_matrix": None}
     if action == "fill_gaps":
         if not (state.get("coverage_matrix") or {}).get("uncovered"):
             raise GateInputError("There are no uncovered requirements to fill.")
